@@ -35,12 +35,10 @@ class JobThorNodeHeight(AbstractJob):
 
         except Exception as e:
             text = f"🚨Error loading URL {self.test_url}: {e!r}"
-            print(text)
+            self.logger.exception(text)
             await self.alert.send(text)
 
     async def compare_block_numbers(self):
-        print(f'----- Tick #{self.tick:010} ------')
-
         block_number_test = await self.retrieve_block_number(self.test_url)
         if block_number_test is None:
             return
@@ -52,8 +50,10 @@ class JobThorNodeHeight(AbstractJob):
         delta = abs(block_number_test - block_number_ref)
         time_delta = delta * BLOCK_TIME
 
-        print(f"Block number diff: {delta} (ref = {block_number_ref} vs test = {block_number_test}) "
-              f"≈{time_delta} sec")
+        self.logger.info(
+            f"Block number diff: {delta} (ref = {block_number_ref} vs test = {block_number_test}) "
+            f"≈{time_delta} sec"
+        )
 
         if abs(block_number_test - block_number_ref) >= self.diff_alert_threshold:
             text = (f"🚨Block number diff is more than {self.diff_alert_threshold} "
