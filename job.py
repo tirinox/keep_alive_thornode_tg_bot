@@ -24,10 +24,7 @@ class AbstractJob(WithLogger, metaclass=ABCMeta):
                 await self.tick()
                 self.logger.info(f"Tick #{self.tick_no} done")
             except Exception as e:
-                try:
-                    self.logger.exception(f"Error in main loop: {e!r}")
-                    await self.alert.send(f"🚨Error in main loop: {e!r}")
-                except Exception as e2:
-                    self.logger.exception(f"Error sending alert: {e2!r} from {e!r}")
+                self.logger.exception(f"Error in main loop: {e!r}")
+                await self.alert.send(f"🚨Error in main loop: {type(e).__name__}")
             await asyncio.sleep(self.period)
             self.tick_no += 1

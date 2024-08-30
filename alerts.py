@@ -3,11 +3,14 @@ from urllib import parse
 
 import aiohttp
 
+from logs import WithLogger
 from utils import to_json_bool
 
 
-class AlertSender:
-    def __init__(self, bot_token, receiver_id):
+class AlertSender(WithLogger):
+    def __init__(self, session, bot_token, receiver_id):
+        super().__init__()
+        self.session = session
         self.bot_token = bot_token
         self.receiver_id = receiver_id
 
@@ -16,6 +19,7 @@ class AlertSender:
                                           disable_notification=False):
         with suppress(Exception):
             message_text = message_text.strip()
+            message_text = message_text[:256]
 
             if not message_text:
                 return
@@ -31,12 +35,14 @@ class AlertSender:
                 f"disable_notification={to_json_bool(disable_notification)}"
             )
 
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as resp:
-                    if resp.status != 200:
-                        err = await resp.read()
-                        raise Exception(f'Telegram error: "{err}"')
-                    return resp.status == 200
+            async with self.session.get(url) as resp:
+                if resp.status != 200:
+                    err = await resp.read()
+                    raise Exception(f'Telegram error: "{err}"')
+                return resp.status == 200
 
     async def send(self, text):
-        await self.telegram_send_message_basic(self.receiver_id, text)
+        try:
+            await self.telegram_send_message_basic(self.receiver_id, text)
+        except Exception as e:
+            self.logger.exception(f"Error sending alert: {e!r}")

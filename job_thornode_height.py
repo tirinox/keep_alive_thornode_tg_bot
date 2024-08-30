@@ -34,7 +34,7 @@ class JobThorNodeHeight(AbstractJob):
                 return int(data[0]['thorchain'])
 
         except Exception as e:
-            text = f"🚨Error loading URL {self.test_url}: {e!r}"
+            text = f"🚨Error loading URL {self.test_url}: {type(e).__name__}"
             self.logger.exception(text)
             await self.alert.send(text)
 

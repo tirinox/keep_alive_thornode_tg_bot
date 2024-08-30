@@ -22,7 +22,7 @@ class Main(WithLogger):
         self.diff_alert_threshold = int(os.environ['BLOCK_DIFF_TO_ALERT']) or 10
         self.keep_alive_ticks = int(os.environ['KEEP_ALIVE_NOTIFICATION_PERIOD_TICKS']) or 9999
         self.session = aiohttp.ClientSession()
-        self.alert = AlertSender(self.bot_token, self.admin_id)
+        self.alert = AlertSender(self.session, self.bot_token, self.admin_id)
 
         # jobs are
         self.jobs = [
