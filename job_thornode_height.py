@@ -34,7 +34,7 @@ class JobThorNodeHeight(AbstractJob):
                 return int(data[0]['thorchain'])
 
         except Exception as e:
-            text = f"🚨Error loading URL {self.test_url}: {type(e).__name__}"
+            text = f"🚨 [THOR] Error loading URL {self.test_url}: {type(e).__name__}"
             self.logger.exception(text)
             await self.alert.send(text)
 
@@ -56,7 +56,7 @@ class JobThorNodeHeight(AbstractJob):
         )
 
         if abs(block_number_test - block_number_ref) >= self.diff_alert_threshold:
-            text = (f"🚨Block number diff is more than {self.diff_alert_threshold} "
+            text = (f"🚨 [THOR] Block number diff is more than {self.diff_alert_threshold} "
                     f"<b>({delta} blocks, {time_delta} seconds)</b>!")
             await self.alert.send(text)
 

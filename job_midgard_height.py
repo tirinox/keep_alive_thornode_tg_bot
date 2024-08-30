@@ -2,6 +2,7 @@ from aiohttp import ClientSession
 
 from alerts import AlertSender
 from job import AbstractJob
+from job_thornode_height import BLOCK_TIME
 
 
 class JobMidgardHealth(AbstractJob):
@@ -33,7 +34,7 @@ class JobMidgardHealth(AbstractJob):
                 return data
 
         except Exception as e:
-            text = f"🚨Error loading URL: {self.test_url}: {type(e).__name__}"
+            text = f"🚨 [MDG] Error loading URL: {self.test_url}: {type(e).__name__}"
             self.logger.exception(text)
             await self.alert.send(text)
 
@@ -45,11 +46,11 @@ class JobMidgardHealth(AbstractJob):
             return
 
         if not test_health.get('database', False):
-            await self.alert.send(f"🚨Test URL {self.test_url} has no database connection!")
+            await self.alert.send(f"🚨 [MDG] Test URL {self.test_url} has no database connection!")
             return
 
         if not test_health.get('inSync', False):
-            await self.alert.send(f"🚨Test URL {self.test_url} is out of sync!")
+            await self.alert.send(f"🚨 [MDG] Test URL {self.test_url} is out of sync!")
             return
 
         ref_health = await self.get_health(self.ref_url)
@@ -58,15 +59,18 @@ class JobMidgardHealth(AbstractJob):
 
         test_last_aggr_height = test_health.get('lastAggregated', {}).get('height', 0)
         ref_last_aggr_height = ref_health.get('lastAggregated', {}).get('height', 0)
+        diff = abs(test_last_aggr_height - ref_last_aggr_height)
+        time_delta = diff * BLOCK_TIME
 
         self.logger.info(
-            f"Aggregated height diff: {abs(test_last_aggr_height - ref_last_aggr_height)} "
+            f"Aggregated height diff: {diff} "
             f"(ref = {ref_last_aggr_height} vs test = {test_last_aggr_height})"
         )
 
-        if abs(test_last_aggr_height - ref_last_aggr_height) >= self.diff_alert_threshold:
-            text = (f"🚨Aggregated height diff is more than {self.diff_alert_threshold} blocks "
-                    f"<b>(test={test_last_aggr_height} vs ref={ref_last_aggr_height})</b>!")
+        if diff >= self.diff_alert_threshold:
+            text = (f"🚨 [MDG] Aggregated height diff is more than {self.diff_alert_threshold} blocks: "
+                    f" <b>({diff} blocks | {time_delta} sec)</b>"
+                    f" (test={test_last_aggr_height} vs ref={ref_last_aggr_height})!")
             self.logger.warning(text)
             await self.alert.send(text)
             return
