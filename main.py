@@ -18,25 +18,32 @@ class Main(WithLogger):
         super().__init__()
         self.admin_id = int(os.environ['TG_ADMIN_USER'])
         self.bot_token = os.environ['TG_BOT_TOKEN']
-        self.period = float(os.environ['TICK_PERIOD'])
-        self.diff_alert_threshold = int(os.environ['BLOCK_DIFF_TO_ALERT']) or 10
-        self.keep_alive_ticks = int(os.environ['KEEP_ALIVE_NOTIFICATION_PERIOD_TICKS']) or 9999
+
         self.session = aiohttp.ClientSession()
         self.alert = AlertSender(self.session, self.bot_token, self.admin_id)
+
+        self.period = float(os.environ.get('TICK_PERIOD', 60))
 
         # jobs are
         self.jobs = [
             JobThorNodeHeight(
                 self.alert, self.session,
-                ref_url=os.environ['THORNODE_REF_URL'], test_url=os.environ['THORNODE_TEST_URL'],
-                period=self.period, diff_alert_threshold=self.diff_alert_threshold
+                ref_url=os.environ['THORNODE_REF_URL'],
+                test_url=os.environ['THORNODE_TEST_URL'],
+                period=self.period,
+                diff_alert_threshold=int(os.environ.get('THOR_BLOCK_DIFF_TO_ALERT', 10))
             ),
-            JobWatchdog(self.alert, self.period, self.keep_alive_ticks),
             JobMidgardHealth(
                 self.alert, self.session,
-                ref_url=os.environ['MIDGARD_HEALTH_REF_URL'], test_url=os.environ['MIDGARD_HEALTH_TEST_URL'],
-                period=self.period, diff_alert_threshold=self.diff_alert_threshold
-            )
+                ref_url=os.environ['MIDGARD_HEALTH_REF_URL'],
+                test_url=os.environ['MIDGARD_HEALTH_TEST_URL'],
+                period=self.period,
+                diff_alert_threshold=int(os.environ.get('MIDGARD_BLOCK_DIFF_TO_ALERT', 10)),
+            ),
+            JobWatchdog(
+                self.alert, self.period,
+                keep_alive_ticks=int(os.environ.get('KEEP_ALIVE_NOTIFICATION_PERIOD_TICKS', 1440))
+            ),
         ]
 
     async def run(self):
