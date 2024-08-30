@@ -39,6 +39,8 @@ class JobMidgardHealth(AbstractJob):
 
     async def tick(self):
         test_health = await self.get_health(self.test_url)
+
+        self.logger.info(f"Test health: {test_health}")
         if test_health is None:
             return
 
