@@ -40,6 +40,7 @@ class AlertSender(WithLogger):
 
     async def send(self, text):
         try:
+            self.logger.info(f"Sending alert: {text!r}")
             await self.telegram_send_message_basic(self.receiver_id, text)
         except Exception as e:
             self.logger.exception(f"Error sending alert: {e!r}")
