@@ -3,6 +3,7 @@ from aiohttp import ClientSession
 from alerts import AlertSender
 from job import AbstractJob
 from job_thornode_height import BLOCK_TIME
+from utils import normalize_url
 
 
 class JobMidgardHealth(AbstractJob):
@@ -15,13 +16,8 @@ class JobMidgardHealth(AbstractJob):
         self.diff_alert_threshold = diff_alert_threshold
 
     @staticmethod
-    def fix_url(test_url):
-        test_url = test_url.rstrip('/')
-        if not test_url.endswith('/v2/health'):
-            test_url += '/v2/health'
-        if not test_url.startswith('http'):
-            test_url = 'https://' + test_url
-        return test_url
+    def fix_url(url: str):
+        return normalize_url(url, '/v2/health')
 
     async def get_health(self, url):
         try:

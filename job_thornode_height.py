@@ -2,6 +2,7 @@ import aiohttp
 
 from alerts import AlertSender
 from job import AbstractJob
+from utils import normalize_url
 
 BLOCK_TIME = 6
 
@@ -16,12 +17,7 @@ class JobThorNodeHeight(AbstractJob):
 
     @staticmethod
     def fix_url(url: str):
-        url = url.rstrip('/')
-        if not url.endswith('/thorchain/lastblock'):
-            url += '/thorchain/lastblock'
-        if not url.startswith('http'):
-            url = 'https://' + url
-        return url
+        return normalize_url(url, '/thorchain/lastblock')
 
     async def retrieve_block_number(self, url):
         try:
