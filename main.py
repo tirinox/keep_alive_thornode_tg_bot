@@ -58,7 +58,7 @@ class Main(WithLogger):
     async def run(self):
         self.logger.info("Starting main loop")
         with suppress(Exception):
-            await self.alert.send("🚀 Starting main loop")
+            await self.alert.send("🚀 Bot restarted!")
 
         await asyncio.gather(
             *[job.run() for job in self.jobs]
