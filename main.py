@@ -24,6 +24,7 @@ class Main(WithLogger):
         a = self.alert = AlertSender(self.session, self.bot_token, self.admin_id)
 
         self.period = float(os.environ.get('TICK_PERIOD', 60))
+        self.logger.info(f'Tick period is {self.period} sec.')
 
         ref_thornode = os.environ['THORNODE_REF_URL']
         test_thornode = os.environ['THORNODE_TEST_URL']
