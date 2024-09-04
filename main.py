@@ -53,6 +53,7 @@ class Main(WithLogger):
                 a, s,
                 ref_url=ref_thornode,
                 test_url=test_thornode,
+                period=self.period
             )
         ]
 
