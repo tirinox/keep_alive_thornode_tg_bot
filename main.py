@@ -12,6 +12,7 @@ from job_thornode_height import JobThorNodeHeight
 from job_version import JobThorNodeVersion
 from job_watchdog import JobWatchdog
 from logs import WithLogger, setup_logs
+from utils import parse_timespan_to_seconds
 
 
 class Main(WithLogger):
@@ -23,8 +24,8 @@ class Main(WithLogger):
         s = self.session = aiohttp.ClientSession()
         a = self.alert = AlertSender(self.session, self.bot_token, self.admin_id)
 
-        self.period = float(os.environ.get('TICK_PERIOD', 60))
-        self.logger.info(f'Tick period is {self.period} sec.')
+        self.period = float(os.environ.get('TICK_PERIOD', 10))
+        self.logger.info(f'Tick period is set to {self.period} sec.')
 
         ref_thornode = os.environ['THORNODE_REF_URL']
         test_thornode = os.environ['THORNODE_TEST_URL']
@@ -47,7 +48,7 @@ class Main(WithLogger):
             ),
             JobWatchdog(
                 a, self.period,
-                keep_alive_ticks=int(os.environ.get('KEEP_ALIVE_NOTIFICATION_PERIOD_TICKS', 1440))
+                alert_period_sec=parse_timespan_to_seconds(os.environ.get('WATCH_DOG_PERIOD', '5m'))
             ),
             JobThorNodeVersion(
                 a, s,

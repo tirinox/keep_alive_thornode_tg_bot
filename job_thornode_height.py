@@ -9,7 +9,7 @@ BLOCK_TIME = 6
 
 class JobThorNodeHeight(AbstractJob):
     def __init__(self, alert: AlertSender, session, test_url, ref_url, period=10.0, diff_alert_threshold=10):
-        super().__init__(alert, period)
+        super().__init__(alert, period, session)
         self.session = session or aiohttp.ClientSession()
         self.test_url = self.fix_url(test_url)
         self.ref_url = self.fix_url(ref_url)
