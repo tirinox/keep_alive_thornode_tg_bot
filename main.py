@@ -48,7 +48,8 @@ class Main(WithLogger):
                 diff_alert_threshold=int(os.environ.get('MIDGARD_BLOCK_DIFF_TO_ALERT', 10)),
             ),
             JobWatchdog(
-                a, self.period,
+                a,
+                self.period,
                 alert_period_sec=parse_timespan_to_seconds(os.environ.get('WATCH_DOG_PERIOD', '5m'))
             ),
             JobThorNodeVersion(
