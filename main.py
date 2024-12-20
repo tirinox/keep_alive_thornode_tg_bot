@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 from alerts import AlertSender
 from job_midgard_height import JobMidgardHealth
+from job_midgard_sync import JobMidgardSync
 from job_thornode_height import JobThorNodeHeight
 from job_version import JobThorNodeVersion
 from job_watchdog import JobWatchdog
@@ -55,7 +56,13 @@ class Main(WithLogger):
                 ref_url=ref_thornode,
                 test_url=test_thornode,
                 period=self.period
-            )
+            ),
+            JobMidgardSync(
+                a, s,
+                period=self.period,
+                target_url=os.environ['MIDGARD_SYNC_STATUS_URL'],
+                progress_step=float(os.environ.get('MIDGARD_PROGRESS_STEP', 1.0))
+            ),
         ]
 
     async def run(self):
