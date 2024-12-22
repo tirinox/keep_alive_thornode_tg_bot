@@ -53,7 +53,7 @@ class JobMidgardSync(AbstractJob):
 
             # json logs
             logs = await resp.json()
-            messages = [log['message'] for log in logs['logs']]
+            messages = [log.get('message', '') for log in logs['logs']]
             return messages
 
     @staticmethod
